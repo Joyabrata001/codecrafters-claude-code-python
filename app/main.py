@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import sys
 
@@ -44,6 +45,27 @@ def main():
 
     if not chat.choices or len(chat.choices) == 0:
         raise RuntimeError("no choices in response")
+
+    choice = chat.choices[0]
+    msg = choice.message
+
+    if msg.tool_calls:
+        tool_call = msg.tool_calls[0]
+
+        if tool_call.type == "function":
+            if tool_call.function.name == "Read":
+                arguments = json.loads(tool_call.function.arguments)
+                file_path = arguments.get("file_path")
+
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        content = f.read()
+                        print(content, end="")
+                except Exception as e:
+                    print(f"Error reading file: {e}", file=sys.stderr)
+            else:
+                if msg.content:
+                    print(msg.content)
 
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
