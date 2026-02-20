@@ -1,0 +1,66 @@
+"""Contains OpenRouterClient class definition"""
+
+import json
+from typing import Iterable, List
+
+from openai import Omit, OpenAI, omit
+from openai.types.chat import ChatCompletionMessage, ChatCompletionToolUnionParam
+from app.env_config import EnvConfig
+from app.file_tool_handler import FileToolHandler
+
+
+class OpenRouterClient:
+    """Manages LLM lifecycle and tools definitions"""
+
+    def __init__(self, env_config: EnvConfig) -> None:
+        if not env_config.api_key:
+            raise ValueError("OPENROUTER_API_KEY is not set")
+
+        self.client = OpenAI(api_key=env_config.api_key, base_url=env_config.base_url)
+        self.model = env_config.model
+
+    def get_tools_definition(self) -> Iterable[ChatCompletionToolUnionParam] | Omit:
+        tools: List[ChatCompletionToolUnionParam] = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "Read",
+                    "description": "Read and return the contents of a file",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "file_path": {
+                                "type": "string",
+                                "description": "The path to the file to read",
+                            }
+                        },
+                        "required": ["file_path"],
+                    },
+                },
+            }
+        ]
+
+        return tools
+
+    def run_prompt(self, prompt: str):
+        try:
+            return self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                tools=self.get_tools_definition(),
+            )
+        except Exception as e:
+            return f"An unexpected error occurred: {e}"
+
+    def handle_tool_calls(self, message: ChatCompletionMessage):
+        for tool_call in message.tool_calls or []:
+            if tool_call.type == "function":
+                if tool_call.function.name == "Read":
+                    arguments = json.loads(tool_call.function.arguments)
+                    file_path = arguments.get("file_path")
+
+                    result = FileToolHandler.read_file(file_path=file_path)
+                    print(result)
+                else:
+                    if message.content:
+                        print(message.content)
