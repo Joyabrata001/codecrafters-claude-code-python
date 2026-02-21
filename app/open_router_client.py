@@ -4,10 +4,7 @@ import json
 from typing import Iterable, List
 
 from openai import Omit, OpenAI
-from openai.types.chat import (
-    ChatCompletionMessage,
-    ChatCompletionToolUnionParam,
-)
+from openai.types.chat import ChatCompletionToolUnionParam
 from app.env_config import EnvConfig
 from app.file_tool_handler import FileToolHandler
 

@@ -1,8 +1,5 @@
 import argparse
 import os
-from typing import Iterable
-
-from sqlalchemy import true
 
 from app.env_config import EnvConfig
 from app.open_router_client import OpenRouterClient
