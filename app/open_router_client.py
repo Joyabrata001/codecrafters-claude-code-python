@@ -37,7 +37,28 @@ class OpenRouterClient:
                         "required": ["file_path"],
                     },
                 },
-            }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "Write",
+                    "description": "Write content to a file",
+                    "parameters": {
+                        "type": "object",
+                        "required": ["file_path", "content"],
+                        "properties": {
+                            "file_path": {
+                                "type": "string",
+                                "description": "The path of the file to write to",
+                            },
+                            "content": {
+                                "type": "string",
+                                "description": "The content to write to the file",
+                            },
+                        },
+                    },
+                },
+            },
         ]
 
         return tools
@@ -83,8 +104,9 @@ class OpenRouterClient:
 
         for tool_call in message.tool_calls:
             if tool_call.type == "function":
+                arguments = json.loads(tool_call.function.arguments)
+
                 if tool_call.function.name == "Read":
-                    arguments = json.loads(tool_call.function.arguments)
                     file_path = arguments.get("file_path")
 
                     content = FileToolHandler.read_file(file_path=file_path)
@@ -95,6 +117,25 @@ class OpenRouterClient:
                             "tool_call_id": tool_call.id,
                             "name": "Read",
                             "content": str(content),
+                        }
+                    )
+
+                elif tool_call.type == "Write":
+                    file_path = arguments.get("file_path")
+                    content = arguments.get("content")
+
+                    status = FileToolHandler.write_file(
+                        file_path=file_path,
+                        content=content,
+                        mode="x",
+                    )
+
+                    results.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "name": "Read",
+                            "content": str(status),
                         }
                     )
 
