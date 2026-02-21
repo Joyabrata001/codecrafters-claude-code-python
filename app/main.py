@@ -1,12 +1,7 @@
 import argparse
-import json
 import os
-import sys
-
-from openai import OpenAI
 
 from app.env_config import EnvConfig
-from app.file_tool_handler import FileToolHandler
 from app.open_router_client import OpenRouterClient
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -38,7 +33,8 @@ def main():
             print("No response received from the model")
             return
 
-        print(chat.choices[0].message.content)
+        for chat_choices in chat.choices:
+            print(chat_choices.message.content)
 
     except (ValueError, KeyError, RuntimeError) as e:
         print(f"Application error: {e}")
