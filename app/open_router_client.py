@@ -134,7 +134,7 @@ class OpenRouterClient:
                         {
                             "role": "tool",
                             "tool_call_id": tool_call.id,
-                            "name": "Read",
+                            "name": "Write",
                             "content": str(status),
                         }
                     )
