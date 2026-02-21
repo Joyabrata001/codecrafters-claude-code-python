@@ -127,7 +127,6 @@ class OpenRouterClient:
                     status = FileToolHandler.write_file(
                         file_path=file_path,
                         content=content,
-                        mode="x",
                     )
 
                     results.append(

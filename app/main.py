@@ -24,21 +24,6 @@ def main():
         # Initialize client
         app = OpenRouterClient(env_config=env_config)
 
-        # while True:
-        #     chat = app.run_prompt(messages=messages)
-
-        #     if isinstance(chat, str):
-        #         print(f"run_prompt error: {chat}")
-        #         return
-
-        #     if not chat or not chat.choices:
-        #         print("No response received from the model")
-        #         return
-
-        #     for chat_choices in chat.choices:
-        #         print(chat_choices.message.content)
-
-        #     app.handle_tool_calls(message=messages[-1])
         print(app.run_agent_loop(args.p))
 
     except (ValueError, KeyError, RuntimeError) as e:
