@@ -105,8 +105,9 @@ class OpenRouterClient:
         for tool_call in message.tool_calls:
             if tool_call.type == "function":
                 arguments = json.loads(tool_call.function.arguments)
+                function_name = tool_call.function.name
 
-                if tool_call.function.name == "Read":
+                if function_name == "Read":
                     file_path = arguments.get("file_path")
 
                     content = FileToolHandler.read_file(file_path=file_path)
@@ -120,7 +121,7 @@ class OpenRouterClient:
                         }
                     )
 
-                elif tool_call.function.name == "Write":
+                elif function_name == "Write":
                     file_path = arguments.get("file_path")
                     content = arguments.get("content")
 
