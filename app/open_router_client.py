@@ -3,7 +3,7 @@
 import json
 from typing import Iterable, List
 
-from openai import Omit, OpenAI, omit
+from openai import Omit, OpenAI
 from openai.types.chat import ChatCompletionMessage, ChatCompletionToolUnionParam
 from app.env_config import EnvConfig
 from app.file_tool_handler import FileToolHandler
@@ -53,14 +53,21 @@ class OpenRouterClient:
             return f"An unexpected error occurred: {e}"
 
     def handle_tool_calls(self, message: ChatCompletionMessage):
+        results = []
         for tool_call in message.tool_calls or []:
             if tool_call.type == "function":
                 if tool_call.function.name == "Read":
                     arguments = json.loads(tool_call.function.arguments)
                     file_path = arguments.get("file_path")
 
-                    result = FileToolHandler.read_file(file_path=file_path)
-                    print(result)
-                else:
-                    if message.content:
-                        print(message.content)
+                    content = FileToolHandler.read_file(file_path=file_path)
+
+                    results.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "content": content,
+                        }
+                    )
+
+                return results
