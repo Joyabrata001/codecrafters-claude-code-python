@@ -1,5 +1,8 @@
 import argparse
 import os
+from typing import Iterable
+
+from sqlalchemy import true
 
 from app.env_config import EnvConfig
 from app.open_router_client import OpenRouterClient
@@ -21,20 +24,25 @@ def main():
     )
 
     try:
+        # Initialize client
         app = OpenRouterClient(env_config=env_config)
 
-        chat = app.run_prompt(args.p)
+        # while True:
+        #     chat = app.run_prompt(messages=messages)
 
-        if isinstance(chat, str):
-            print(f"run_prompt error: {chat}")
-            return
+        #     if isinstance(chat, str):
+        #         print(f"run_prompt error: {chat}")
+        #         return
 
-        if not chat or not chat.choices:
-            print("No response received from the model")
-            return
+        #     if not chat or not chat.choices:
+        #         print("No response received from the model")
+        #         return
 
-        for chat_choices in chat.choices:
-            print(chat_choices.message.content)
+        #     for chat_choices in chat.choices:
+        #         print(chat_choices.message.content)
+
+        #     app.handle_tool_calls(message=messages[-1])
+        print(app.run_agent_loop(args.p))
 
     except (ValueError, KeyError, RuntimeError) as e:
         print(f"Application error: {e}")

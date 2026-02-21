@@ -4,7 +4,10 @@ import json
 from typing import Iterable, List
 
 from openai import Omit, OpenAI
-from openai.types.chat import ChatCompletionMessage, ChatCompletionToolUnionParam
+from openai.types.chat import (
+    ChatCompletionMessage,
+    ChatCompletionToolUnionParam,
+)
 from app.env_config import EnvConfig
 from app.file_tool_handler import FileToolHandler
 
@@ -42,19 +45,46 @@ class OpenRouterClient:
 
         return tools
 
-    def run_prompt(self, prompt: str):
+    def run_prompt(self, messages):
         try:
             return self.client.chat.completions.create(
                 model=self.model,
-                messages=[{"role": "user", "content": prompt}],
+                messages=messages,
                 tools=self.get_tools_definition(),
             )
         except Exception as e:
-            return f"An unexpected error occurred: {e}"
+            raise RuntimeError(f"An unexpected error occurred: {e}")
 
-    def handle_tool_calls(self, message: ChatCompletionMessage):
+    def run_agent_loop(self, user_prompt: str):
+        # Initialize message list
+        messages = [{"role": "user", "content": user_prompt}]
+
+        # Agent loop
+        try:
+            while True:
+                # Get model response
+                llm_response = self.run_prompt(messages=messages)
+                message = llm_response.choices[0].message
+
+                messages.append(message.model_dump())
+
+                if not message.tool_calls:
+                    return message.content
+
+                tool_results = self.handle_tool_calls(message)
+                messages.extend(tool_results)
+
+        except RuntimeError as e:
+            print(f"Stopping agent: {e}")
+            return
+
+    def handle_tool_calls(self, message):
         results = []
-        for tool_call in message.tool_calls or []:
+
+        if not message.tool_calls:
+            return results
+
+        for tool_call in message.tool_calls:
             if tool_call.type == "function":
                 if tool_call.function.name == "Read":
                     arguments = json.loads(tool_call.function.arguments)
@@ -66,8 +96,9 @@ class OpenRouterClient:
                         {
                             "role": "tool",
                             "tool_call_id": tool_call.id,
-                            "content": content,
+                            "name": "Read",
+                            "content": str(content),
                         }
                     )
 
-                return results
+        return results
