@@ -120,7 +120,7 @@ class OpenRouterClient:
                         }
                     )
 
-                elif tool_call.name == "Write":
+                elif tool_call.function.name == "Write":
                     file_path = arguments.get("file_path")
                     content = arguments.get("content")
 
