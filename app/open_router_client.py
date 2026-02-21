@@ -103,7 +103,7 @@ class OpenRouterClient:
             return results
 
         for tool_call in message.tool_calls:
-            if tool_call.name == "function":
+            if tool_call.type == "function":
                 arguments = json.loads(tool_call.function.arguments)
 
                 if tool_call.function.name == "Read":
