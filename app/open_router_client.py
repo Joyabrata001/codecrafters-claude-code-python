@@ -5,8 +5,10 @@ from typing import Iterable, List
 
 from openai import Omit, OpenAI
 from openai.types.chat import ChatCompletionToolUnionParam
+from app.bash_tool_handler import BashToolHandler
 from app.env_config import EnvConfig
 from app.file_tool_handler import FileToolHandler
+from app.tools_config import TOOLS_SPECIFICATIONS
 
 
 class OpenRouterClient:
@@ -20,47 +22,7 @@ class OpenRouterClient:
         self.model = env_config.model
 
     def get_tools_definition(self) -> Iterable[ChatCompletionToolUnionParam] | Omit:
-        tools: List[ChatCompletionToolUnionParam] = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "Read",
-                    "description": "Read and return the contents of a file",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "The path to the file to read",
-                            }
-                        },
-                        "required": ["file_path"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "Write",
-                    "description": "Write content to a file",
-                    "parameters": {
-                        "type": "object",
-                        "required": ["file_path", "content"],
-                        "properties": {
-                            "file_path": {
-                                "type": "string",
-                                "description": "The path of the file to write to",
-                            },
-                            "content": {
-                                "type": "string",
-                                "description": "The content to write to the file",
-                            },
-                        },
-                    },
-                },
-            },
-        ]
-
+        tools: List[ChatCompletionToolUnionParam] = TOOLS_SPECIFICATIONS
         return tools
 
     def run_prompt(self, messages):
@@ -136,6 +98,20 @@ class OpenRouterClient:
                             "tool_call_id": tool_call.id,
                             "name": "Write",
                             "content": str(status),
+                        }
+                    )
+
+                elif function_name == "Bash":
+                    command = arguments.get("command")
+
+                    output = BashToolHandler.run_command(command=command)
+
+                    results.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "name": "Write",
+                            "content": output,
                         }
                     )
 

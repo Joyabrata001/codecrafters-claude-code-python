@@ -2,6 +2,7 @@ import argparse
 import os
 
 from app.env_config import EnvConfig
+from app.errors import AgentLoopError
 from app.open_router_client import OpenRouterClient
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -26,7 +27,7 @@ def main():
 
         print(app.run_agent_loop(args.p))
 
-    except (ValueError, KeyError, RuntimeError) as e:
+    except AgentLoopError as e:
         print(f"Application error: {e}")
 
 
