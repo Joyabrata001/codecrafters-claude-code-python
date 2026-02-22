@@ -20,6 +20,7 @@ class OpenRouterClient:
 
         self.client = OpenAI(api_key=env_config.api_key, base_url=env_config.base_url)
         self.model = env_config.model
+        self.max_agent_steps = env_config.max_agent_steps
 
     def get_tools_definition(self) -> Iterable[ChatCompletionToolUnionParam] | Omit:
         tools: List[ChatCompletionToolUnionParam] = TOOLS_SPECIFICATIONS
@@ -41,7 +42,7 @@ class OpenRouterClient:
 
         # Agent loop
         try:
-            while True:
+            for _ in range(self.max_agent_steps):
                 # Get model response
                 llm_response = self.run_prompt(messages=messages)
                 message = llm_response.choices[0].message

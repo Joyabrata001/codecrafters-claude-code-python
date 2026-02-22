@@ -6,6 +6,38 @@ import subprocess
 from app.errors import BashExecutionError
 
 
+ALLOWED_COMMANDS = frozenset(
+    {
+        # File directory and navigation
+        "ls",
+        "pwd",
+        "cd",
+        # File content and manipulation
+        "cat",
+        "head",
+        "tail",
+        "grep",
+        "find",
+        "touch",
+        "mkdir",
+        # File operations
+        "cp",
+        "mv",
+        "rm",
+        # Text processing
+        "sed",
+        "awk",
+        "sort",
+        "wc",
+        # System and environment info
+        "echo",
+        "date",
+        "whoami",
+        "env",
+    }
+)
+
+
 class BashToolHandler:
     """Handles the execution of shell command"""
 
@@ -14,6 +46,19 @@ class BashToolHandler:
         """Run shell command"""
         try:
             args = shlex.split(command)
+
+            if not args:
+                return ""
+
+        except ValueError as e:
+            raise BashExecutionError(f"Invalid command syntax: {e}")
+
+        base_cmd = args[0]
+
+        if base_cmd not in ALLOWED_COMMANDS:
+            raise BashExecutionError(f"{args[0]} command not allowed.")
+
+        try:
             result = subprocess.run(
                 args=args,
                 capture_output=True,
