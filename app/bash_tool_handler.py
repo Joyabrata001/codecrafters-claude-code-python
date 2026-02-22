@@ -23,7 +23,7 @@ ALLOWED_COMMANDS = frozenset(
         # File operations
         # "cp",
         # "mv",
-        # "rm",
+        "rm",
         # Text processing
         # "sed",
         # "awk",
