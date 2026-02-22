@@ -11,29 +11,29 @@ ALLOWED_COMMANDS = frozenset(
         # File directory and navigation
         "ls",
         "pwd",
-        "cd",
+        # "cd",
         # File content and manipulation
         "cat",
         "head",
         "tail",
         "grep",
         "find",
-        "touch",
-        "mkdir",
+        # "touch",
+        # "mkdir",
         # File operations
-        "cp",
-        "mv",
-        "rm",
+        # "cp",
+        # "mv",
+        # "rm",
         # Text processing
-        "sed",
-        "awk",
-        "sort",
-        "wc",
+        # "sed",
+        # "awk",
+        # "sort",
+        # "wc",
         # System and environment info
         "echo",
         "date",
         "whoami",
-        "env",
+        # "env",
     }
 )
 
@@ -48,10 +48,10 @@ class BashToolHandler:
             args = shlex.split(command)
 
             if not args:
-                return ""
+                raise BashExecutionError("Empty command")
 
-        except ValueError as e:
-            raise BashExecutionError(f"Invalid command syntax: {e}")
+        except Exception as e:
+            raise BashExecutionError(f"Invalid command syntax: {e}") from e
 
         base_cmd = args[0]
 

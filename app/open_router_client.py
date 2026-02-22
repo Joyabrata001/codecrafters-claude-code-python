@@ -7,6 +7,7 @@ from openai import Omit, OpenAI
 from openai.types.chat import ChatCompletionToolUnionParam
 from app.bash_tool_handler import BashToolHandler
 from app.env_config import EnvConfig
+from app.errors import AgentLoopError
 from app.file_tool_handler import FileToolHandler
 from app.tools_config import TOOLS_SPECIFICATIONS
 
@@ -15,9 +16,6 @@ class OpenRouterClient:
     """Manages LLM lifecycle and tools definitions"""
 
     def __init__(self, env_config: EnvConfig) -> None:
-        if not env_config.api_key:
-            raise ValueError("OPENROUTER_API_KEY is not set")
-
         self.client = OpenAI(api_key=env_config.api_key, base_url=env_config.base_url)
         self.model = env_config.model
         self.max_agent_steps = env_config.max_agent_steps
@@ -55,9 +53,10 @@ class OpenRouterClient:
                 tool_results = self.handle_tool_calls(message)
                 messages.extend(tool_results)
 
+            raise AgentLoopError(f"Agent exceeded max steps ({self.max_agent_steps})")
+
         except RuntimeError as e:
-            print(f"Stopping agent: {e}")
-            return
+            raise AgentLoopError(f"Stopping agent: {e}") from e
 
     def handle_tool_calls(self, message):
         results = []

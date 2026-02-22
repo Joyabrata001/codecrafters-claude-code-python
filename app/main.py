@@ -25,6 +25,8 @@ def main():
         max_agent_steps=MAX_AGENT_STEPS,
     )
 
+    env_config.validate()
+
     try:
         # Initialize client
         app = OpenRouterClient(env_config=env_config)
