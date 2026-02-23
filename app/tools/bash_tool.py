@@ -4,8 +4,6 @@ import shlex
 import subprocess
 from typing import Any, Dict
 
-from click import command
-
 from app.errors import BashExecutionError
 
 
