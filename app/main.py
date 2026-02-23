@@ -18,6 +18,8 @@ def main():
     p.add_argument("-p", required=True)
     args = p.parse_args()
 
+    print(f"DEVDEV: {API_KEY}")
+
     env_config = EnvConfig(
         api_key=API_KEY,
         base_url=BASE_URL,
