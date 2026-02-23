@@ -3,7 +3,7 @@
 from app.errors import FileReadError, FileWriteError
 
 
-class FileToolHandler:
+class FileTool:
     """Handles the execution of file-related system tools."""
 
     @staticmethod

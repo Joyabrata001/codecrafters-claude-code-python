@@ -3,7 +3,7 @@
 import argparse
 import os
 
-from app.env_config import EnvConfig
+from app.config.env_config import EnvConfig
 from app.errors import AgentLoopError
 from app.open_router_client import OpenRouterClient
 

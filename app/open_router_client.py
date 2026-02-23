@@ -5,11 +5,11 @@ from typing import Iterable, List
 
 from openai import Omit, OpenAI
 from openai.types.chat import ChatCompletionToolUnionParam
-from app.bash_tool_handler import BashToolHandler
-from app.env_config import EnvConfig
+from app.tools.bash_tool import BashTool
+from app.config.env_config import EnvConfig
 from app.errors import AgentLoopError
-from app.file_tool_handler import FileToolHandler
-from app.tools_config import TOOLS_SPECIFICATIONS
+from app.tools.file_tool import FileTool
+from app.config.tools_config import TOOLS_SPECIFICATIONS
 
 
 class OpenRouterClient:
@@ -72,7 +72,7 @@ class OpenRouterClient:
                 if function_name == "Read":
                     file_path = arguments.get("file_path")
 
-                    content = FileToolHandler.read_file(file_path=file_path)
+                    content = FileTool.read_file(file_path=file_path)
 
                     results.append(
                         {
@@ -87,7 +87,7 @@ class OpenRouterClient:
                     file_path = arguments.get("file_path")
                     content = arguments.get("content")
 
-                    status = FileToolHandler.write_file(
+                    status = FileTool.write_file(
                         file_path=file_path,
                         content=content,
                     )
@@ -104,7 +104,7 @@ class OpenRouterClient:
                 elif function_name == "Bash":
                     command = arguments.get("command")
 
-                    output = BashToolHandler.run_command(command=command)
+                    output = BashTool.run_command(command=command)
 
                     results.append(
                         {

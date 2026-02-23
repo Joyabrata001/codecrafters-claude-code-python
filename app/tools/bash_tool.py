@@ -38,7 +38,7 @@ ALLOWED_COMMANDS = frozenset(
 )
 
 
-class BashToolHandler:
+class BashTool:
     """Handles the execution of shell command"""
 
     @staticmethod
