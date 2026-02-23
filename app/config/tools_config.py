@@ -7,7 +7,7 @@ TOOLS_SPECIFICATIONS: List[ChatCompletionToolUnionParam] = [
     {
         "type": "function",
         "function": {
-            "name": "Read",
+            "name": "FileRead",
             "description": "Read and return the contents of a file",
             "parameters": {
                 "type": "object",
@@ -24,7 +24,7 @@ TOOLS_SPECIFICATIONS: List[ChatCompletionToolUnionParam] = [
     {
         "type": "function",
         "function": {
-            "name": "Write",
+            "name": "FileWrite",
             "description": "Write content to a file",
             "parameters": {
                 "type": "object",

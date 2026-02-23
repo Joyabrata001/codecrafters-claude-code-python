@@ -5,20 +5,20 @@ from typing import Iterable, List
 
 from openai import Omit, OpenAI
 from openai.types.chat import ChatCompletionToolUnionParam
-from app.tools.bash_tool import BashTool
+from app.tools.base_tool import BaseTool
 from app.config.env_config import EnvConfig
 from app.errors import AgentLoopError
-from app.tools.file_tool import FileTool
 from app.config.tools_config import TOOLS_SPECIFICATIONS
 
 
 class OpenRouterClient:
     """Manages LLM lifecycle and tools definitions"""
 
-    def __init__(self, env_config: EnvConfig) -> None:
+    def __init__(self, env_config: EnvConfig, tools: List[BaseTool]) -> None:
         self.client = OpenAI(api_key=env_config.api_key, base_url=env_config.base_url)
         self.model = env_config.model
         self.max_agent_steps = env_config.max_agent_steps
+        self.tools = {tool.name(): tool for tool in tools}
 
     def get_tools_definition(self) -> Iterable[ChatCompletionToolUnionParam] | Omit:
         tools: List[ChatCompletionToolUnionParam] = TOOLS_SPECIFICATIONS
@@ -66,53 +66,23 @@ class OpenRouterClient:
 
         for tool_call in message.tool_calls:
             if tool_call.type == "function":
-                arguments = json.loads(tool_call.function.arguments)
                 function_name = tool_call.function.name
+                arguments = json.loads(tool_call.function.arguments)
 
-                if function_name == "Read":
-                    file_path = arguments.get("file_path")
+                tool = self.tools.get(function_name)
 
-                    content = FileTool.read_file(file_path=file_path)
+                if not tool:
+                    continue
 
-                    results.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "name": "Read",
-                            "content": str(content),
-                        }
-                    )
+                output = tool.execute(arguments=arguments)
 
-                elif function_name == "Write":
-                    file_path = arguments.get("file_path")
-                    content = arguments.get("content")
-
-                    status = FileTool.write_file(
-                        file_path=file_path,
-                        content=content,
-                    )
-
-                    results.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "name": "Write",
-                            "content": str(status),
-                        }
-                    )
-
-                elif function_name == "Bash":
-                    command = arguments.get("command")
-
-                    output = BashTool.run_command(command=command)
-
-                    results.append(
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "name": "Write",
-                            "content": output,
-                        }
-                    )
+                results.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": "Read",
+                        "content": output,
+                    }
+                )
 
         return results

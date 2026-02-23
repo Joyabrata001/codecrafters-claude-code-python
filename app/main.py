@@ -6,11 +6,21 @@ import os
 from app.config.env_config import EnvConfig
 from app.errors import AgentLoopError
 from app.open_router_client import OpenRouterClient
+from app.tools.bash_tool import BashTool
+from app.tools.file_read_tool import FileReadTool
+from app.tools.file_write_tool import FileWriteTool
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
 DEFAULT_MODEL = "anthropic/claude-haiku-4.5"
 MAX_AGENT_STEPS = 10
+
+
+tools = [
+    BashTool(),
+    FileReadTool(),
+    FileWriteTool(),
+]
 
 
 def main():
@@ -29,7 +39,7 @@ def main():
 
     try:
         # Initialize client
-        app = OpenRouterClient(env_config=env_config)
+        app = OpenRouterClient(env_config=env_config, tools=tools)
 
         print(app.run_agent_loop(args.p))
 

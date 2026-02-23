@@ -1,7 +1,10 @@
-"""Contains BashHandler class definition"""
+"""Contains BashTool class definition"""
 
 import shlex
 import subprocess
+from typing import Any, Dict
+
+from click import command
 
 from app.errors import BashExecutionError
 
@@ -41,14 +44,21 @@ ALLOWED_COMMANDS = frozenset(
 class BashTool:
     """Handles the execution of shell command"""
 
-    @staticmethod
-    def run_command(command: str) -> str:
+    def name(self) -> str:
+        return "Bash"
+
+    def execute(self, arguments: Dict[str, Any]) -> str:
+        command = arguments.get("command")
+
+        if not command:
+            raise BashExecutionError("Empty command")
+        
+        return self._run_command(command)
+
+    def _run_command(self, command: str) -> str:
         """Run shell command"""
         try:
             args = shlex.split(command)
-
-            if not args:
-                raise BashExecutionError("Empty command")
 
         except Exception as e:
             raise BashExecutionError(f"Invalid command syntax: {e}") from e
