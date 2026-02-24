@@ -32,7 +32,7 @@ class OpenRouterClient:
                 tools=self.get_tools_definition(),
             )
         except Exception as e:
-            raise RuntimeError(f"An unexpected error occurred: {e}")
+            raise RuntimeError(f"An unexpected error occurred: {e}") from e
 
     def run_agent_loop(self, user_prompt: str):
         # Initialize message list

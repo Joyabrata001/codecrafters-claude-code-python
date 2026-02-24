@@ -50,7 +50,7 @@ class BashTool:
 
         if not command:
             raise BashExecutionError("Empty command")
-        
+
         return self._run_command(command)
 
     def _run_command(self, command: str) -> str:
